@@ -1,3 +1,25 @@
+/*****************************************************************************
+**				Primal-Dual Scene Flow for RGB-D cameras					**
+**				----------------------------------------					**
+**																			**
+**	Copyright(c) 2015, Mariano Jaimez Tarifa, University of Malaga			**
+**	Copyright(c) 2015, Mohamed Souiai, Technical University of Munich		**
+**	Copyright(c) 2015, MAPIR group, University of Malaga					**
+**	Copyright(c) 2015, Computer Vision group, Tech. University of Munich	**
+**																			**
+**  This program is free software: you can redistribute it and/or modify	**
+**  it under the terms of the GNU General Public License (version 3) as		**
+**	published by the Free Software Foundation.								**
+**																			**
+**  This program is distributed in the hope that it will be useful, but		**
+**	WITHOUT ANY WARRANTY; without even the implied warranty of				**
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the			**
+**  GNU General Public License for more details.							**
+**																			**
+**  You should have received a copy of the GNU General Public License		**
+**  along with this program.  If not, see <http://www.gnu.org/licenses/>.	**
+**																			**
+*****************************************************************************/
 
 #include "scene_flow_visualization.h"
 
@@ -20,13 +42,10 @@ PD_flow_mrpt::PD_flow_mrpt(unsigned int cam_mode_config, unsigned int fps_config
     fps = fps_config;		//In Hz
 
     //Compute gaussian mask
-	int v_mask[5] = {1,4,6,4,1};
-    g_mask.setSize(5,5);
+	float v_mask[5] = {1.f,4.f,6.f,4.f,1.f};
     for (unsigned int i=0; i<5; i++)
         for (unsigned int j=0; j<5; j++)
-            g_mask(i,j) = v_mask[i]*v_mask[j];
-
-    g_mask = g_mask/256.f;
+            g_mask[i+5*j] = v_mask[i]*v_mask[j]/256.f;
 
     //Matrices that store the original and filtered images with the image resolution
     colour_wf.setSize(480/cam_mode,640/cam_mode);
@@ -91,8 +110,8 @@ PD_flow_mrpt::PD_flow_mrpt(unsigned int cam_mode_config, unsigned int fps_config
 
 void PD_flow_mrpt::createImagePyramidGPU()
 {
-    utils::CTicTac clock;
-    clock.Tic();
+    //utils::CTicTac clock;
+    //clock.Tic();
 
     //Cuda copy new frames
     csf_host.copyNewFrames(colour_wf.data(), depth_wf.data());
@@ -106,8 +125,8 @@ void PD_flow_mrpt::createImagePyramidGPU()
     //Cuda copy object back to host
     BridgeBack(&csf_host, csf_device);
 
-	//Execution results
-	const float aux_time = 1000.f*clock.Tac();
+	////Execution results
+	//const float aux_time = 1000.f*clock.Tac();
     //cout << endl << "Time for the pyramid: " << aux_time << "ms";
 }
 
@@ -201,7 +220,7 @@ bool PD_flow_mrpt::OpenCamera()
 
     rc = openni::OpenNI::initialize();
 
-    printf("After initialization:\n %s\n", openni::OpenNI::getExtendedError());
+    printf("Opening camera...\n %s\n", openni::OpenNI::getExtendedError());
     rc = device.open(deviceURI);
     if (rc != openni::STATUS_OK)
     {
@@ -212,9 +231,9 @@ bool PD_flow_mrpt::OpenCamera()
 
     //								Create RGB and Depth channels
     //========================================================================================
-
     rc = dimage.create(device, openni::SENSOR_DEPTH);
     rc = rgb.create(device, openni::SENSOR_COLOR);
+
 
 	//                            Configure some properties (resolution)
 	//========================================================================================
@@ -249,7 +268,7 @@ bool PD_flow_mrpt::OpenCamera()
     rc = dimage.start();
     if (rc != openni::STATUS_OK)
     {
-        printf("SimpleViewer: Couldn't start depth stream:\n%s\n", openni::OpenNI::getExtendedError());
+        printf("Couldn't start depth stream:\n%s\n", openni::OpenNI::getExtendedError());
         dimage.destroy();
     }
 
@@ -318,7 +337,7 @@ void PD_flow_mrpt::freeGPUMemory()
 void PD_flow_mrpt::initializeCUDA()
 {
     //Read parameters
-    csf_host.readParameters(rows, cols, lambda_i, lambda_d, mu, g_mask.data(), ctf_levels, len_disp, cam_mode, fovh, fovv, f_dist);
+    csf_host.readParameters(rows, cols, lambda_i, lambda_d, mu, g_mask, ctf_levels, len_disp, cam_mode, fovh, fovv, f_dist);
 
     //Allocate memory
     csf_host.allocateDevMemory();
@@ -341,7 +360,6 @@ void PD_flow_mrpt::initializeScene()
     fpoints_gl->setColor(0, 1, 1);
     fpoints_gl->enablePointSmooth();
     fpoints_gl->setPointSize(3.0);
-    fpoints_gl->setPose(CPose3D(0,0,0,0,0,0));
     scene->insert( fpoints_gl );
 
     //Scene Flow
@@ -351,7 +369,6 @@ void PD_flow_mrpt::initializeScene()
     sf->setPointColor(1,0,0);
     sf->setVectorFieldColor(0,0,1);
     sf->enableAntiAliasing();
-    sf->setPose(CPose3D(0,0,0,0,0,0));
     scene->insert( sf );
 
     //Reference frame
@@ -400,7 +417,7 @@ void PD_flow_mrpt::initializePDFlow()
 	initializeScene();
 
     //Initialize CUDA
-    mrpt::system::sleep(1000);
+    mrpt::system::sleep(500);
     initializeCUDA();
 
 	//Start video streaming

@@ -1,7 +1,25 @@
-// Author: Mariano Jaimez Tarifa
-// Organization: MAPIR, University of Malaga
-// Date: January 2014
-// License: GNU
+/*****************************************************************************
+**				Primal-Dual Scene Flow for RGB-D cameras					**
+**				----------------------------------------					**
+**																			**
+**	Copyright(c) 2015, Mariano Jaimez Tarifa, University of Malaga			**
+**	Copyright(c) 2015, Mohamed Souiai, Technical University of Munich		**
+**	Copyright(c) 2015, MAPIR group, University of Malaga					**
+**	Copyright(c) 2015, Computer Vision group, Tech. University of Munich	**
+**																			**
+**  This program is free software: you can redistribute it and/or modify	**
+**  it under the terms of the GNU General Public License (version 3) as		**
+**	published by the Free Software Foundation.								**
+**																			**
+**  This program is distributed in the hope that it will be useful, but		**
+**	WITHOUT ANY WARRANTY; without even the implied warranty of				**
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the			**
+**  GNU General Public License for more details.							**
+**																			**
+**  You should have received a copy of the GNU General Public License		**
+**  along with this program.  If not, see <http://www.gnu.org/licenses/>.	**
+**																			**
+*****************************************************************************/
 
 #include <stdio.h>
 #include <string.h>
@@ -49,6 +67,7 @@ int main(int num_arg, char *argv[])
 		}
 	}
 
+	//Initialize the scene flow object and visualization
 	PD_flow_mrpt sceneflow(cam_mode, fps, rows);
 	sceneflow.initializePDFlow();
 	
@@ -60,7 +79,6 @@ int main(int num_arg, char *argv[])
     int stop = 0;
     bool working = false;
 	CTicTac	clock;
-    //clock.Tic();
 
     while (!stop)
     {
@@ -102,7 +120,7 @@ int main(int num_arg, char *argv[])
 			const float exec_time = clock.Tac();
 			clock.Tic();
             if (exec_time > 1.05f/sceneflow.fps)
-				printf("\n Not enough time to compute the scene flow at %f Hz", sceneflow.fps);
+				printf("\n Not enough time to compute the scene flow at %d Hz", int(sceneflow.fps));
 
             sceneflow.CaptureFrame();
             clock.Tic();

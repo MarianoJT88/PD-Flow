@@ -1,3 +1,25 @@
+/*****************************************************************************
+**				Primal-Dual Scene Flow for RGB-D cameras					**
+**				----------------------------------------					**
+**																			**
+**	Copyright(c) 2015, Mariano Jaimez Tarifa, University of Malaga			**
+**	Copyright(c) 2015, Mohamed Souiai, Technical University of Munich		**
+**	Copyright(c) 2015, MAPIR group, University of Malaga					**
+**	Copyright(c) 2015, Computer Vision group, Tech. University of Munich	**
+**																			**
+**  This program is free software: you can redistribute it and/or modify	**
+**  it under the terms of the GNU General Public License (version 3) as		**
+**	published by the Free Software Foundation.								**
+**																			**
+**  This program is distributed in the hope that it will be useful, but		**
+**	WITHOUT ANY WARRANTY; without even the implied warranty of				**
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the			**
+**  GNU General Public License for more details.							**
+**																			**
+**  You should have received a copy of the GNU General Public License		**
+**  along with this program.  If not, see <http://www.gnu.org/licenses/>.	**
+**																			**
+*****************************************************************************/
 
 #include <mrpt/utils.h>
 #include <mrpt/system.h>
@@ -31,7 +53,7 @@ public:
     unsigned int cam_mode;	// (1 - 640 x 480, 2 - 320 x 240, 4 - 160 x 120)
     unsigned int ctf_levels;//Number of levels used in the coarse-to-fine scheme (always dividing by two)
     unsigned int num_max_iter[6];  //Max number of iterations distributed homogeneously between all levels
-    MatrixXf g_mask;
+    float g_mask[25];
 	
     //Matrices that store the original images with the image resolution
     MatrixXf colour_wf;
