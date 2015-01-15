@@ -290,9 +290,9 @@ void PD_flow_opencv::showAndSaveResults()
 	for (unsigned int v=0; v<rows; v++)
 		for (unsigned int u=0; u<cols; u++)
 		{
-			sf_image.at<cv::Vec3b>(v,u)[0] = 255*abs(dxp[v + u*rows])/maxmodx; //Blue
-			sf_image.at<cv::Vec3b>(v,u)[1] = 255*abs(dyp[v + u*rows])/maxmody; //Green
-			sf_image.at<cv::Vec3b>(v,u)[2] = 255*abs(dzp[v + u*rows])/maxmodz; //Red
+			sf_image.at<cv::Vec3b>(v,u)[0] = 255.f*abs(dxp[v + u*rows])/maxmodx; //Blue
+			sf_image.at<cv::Vec3b>(v,u)[1] = 255.f*abs(dyp[v + u*rows])/maxmody; //Green
+			sf_image.at<cv::Vec3b>(v,u)[2] = 255.f*abs(dzp[v + u*rows])/maxmodz; //Red
 		}
 	
 	//Show the scene flow as an RGB image	

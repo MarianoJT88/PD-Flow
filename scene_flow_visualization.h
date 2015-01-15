@@ -30,7 +30,7 @@
 #include "pdflow_cudalib.h"
 #include "legend_pdflow.xpm"
 
-#define M_LOG2E 1.44269504088896340736 //log2(e)
+//#define M_LOG2E 1.44269504088896340736f //log2(e)
 
 inline float log2(const float x){
     return  log(x) * M_LOG2E;

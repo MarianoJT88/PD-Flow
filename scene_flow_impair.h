@@ -27,8 +27,8 @@
 #include "legend_pdflow.xpm"
 #include <ostream>
 
-#define M_PI 3.14159265
-#define M_LOG2E 1.44269504088896340736 //log2(e)
+#define M_PI 3.14159265f
+#define M_LOG2E 1.44269504088896340736f //log2(e)
 
 inline float log2(const float x){
     return  log(x) * M_LOG2E;
