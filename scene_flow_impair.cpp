@@ -27,7 +27,7 @@ PD_flow_opencv::PD_flow_opencv(unsigned int rows_config)
 {     
     rows = rows_config;      //Maximum size of the coarse-to-fine scheme
     cols = rows*320/240;
-    ctf_levels = unsigned int(log2(rows/15)) + 1;
+    ctf_levels = static_cast<unsigned int>(log2(rows/15)) + 1;
     fovh = M_PI*62.5f/180.f;
     fovv = M_PI*45.f/180.f;
     len_disp = 0.022f;
@@ -68,7 +68,7 @@ void PD_flow_opencv::createImagePyramidGPU()
     //Cuda copy object to device
     csf_device = ObjectToDevice(&csf_host);
 
-    unsigned int pyr_levels = unsigned int(log2(width/cols)) + ctf_levels;
+    unsigned int pyr_levels = static_cast<unsigned int>(log2(width/cols)) + ctf_levels;
     GaussianPyramidBridge(csf_device, pyr_levels, cam_mode);
 
     //Cuda copy object back to host
@@ -89,7 +89,7 @@ void PD_flow_opencv::solveSceneFlowGPU()
         s = pow(2.f,int(ctf_levels-(i+1)));
         cols_i = cols/s;
         rows_i = rows/s;
-        level_image = ctf_levels - i + unsigned int(log2(width/cols)) - 1;
+        level_image = ctf_levels - i + static_cast<unsigned int>(log2(width/cols)) - 1;
 
         //=========================================================================
         //                              Cuda - Begin
@@ -274,30 +274,30 @@ void PD_flow_opencv::showAndSaveResults()
 	//Save scene flow as an RGB image (one colour per direction)
 	cv::Mat sf_image(rows, cols, CV_8UC3);
 
-	//Compute the max-min values of the flow
+    //Compute the max values of the flow (of its norm)
 	float maxmodx = 0.f, maxmody = 0.f, maxmodz = 0.f;
 	for (unsigned int v=0; v<rows; v++)
 		for (unsigned int u=0; u<cols; u++)
 		{
-			if (abs(dxp[v + u*rows]) > maxmodx)
-				maxmodx = abs(dxp[v + u*rows]);
-			if (abs(dyp[v + u*rows]) > maxmody)
-				maxmody = abs(dyp[v + u*rows]);
-			if (abs(dzp[v + u*rows]) > maxmodz)
-				maxmodz = abs(dzp[v + u*rows]);
+            if (fabs(dxp[v + u*rows]) > maxmodx)
+                maxmodx = fabs(dxp[v + u*rows]);
+            if (fabs(dyp[v + u*rows]) > maxmody)
+                maxmody = fabs(dyp[v + u*rows]);
+            if (fabs(dzp[v + u*rows]) > maxmodz)
+                maxmodz = fabs(dzp[v + u*rows]);
 		}
 
 	for (unsigned int v=0; v<rows; v++)
 		for (unsigned int u=0; u<cols; u++)
 		{
-			sf_image.at<cv::Vec3b>(v,u)[0] = 255.f*abs(dxp[v + u*rows])/maxmodx; //Blue
-			sf_image.at<cv::Vec3b>(v,u)[1] = 255.f*abs(dyp[v + u*rows])/maxmody; //Green
-			sf_image.at<cv::Vec3b>(v,u)[2] = 255.f*abs(dzp[v + u*rows])/maxmodz; //Red
+            sf_image.at<cv::Vec3b>(v,u)[0] = static_cast<unsigned char>(255.f*fabs(dxp[v + u*rows])/maxmodx); //Blue
+            sf_image.at<cv::Vec3b>(v,u)[1] = static_cast<unsigned char>(255.f*fabs(dyp[v + u*rows])/maxmody); //Green
+            sf_image.at<cv::Vec3b>(v,u)[2] = static_cast<unsigned char>(255.f*fabs(dzp[v + u*rows])/maxmodz); //Red
 		}
 	
 	//Show the scene flow as an RGB image	
 	cv::namedWindow("SceneFlow", cv::WINDOW_NORMAL);
-	cv::moveWindow("SceneFlow",10,10);
+    cv::moveWindow("SceneFlow",width - cols/2,height - rows/2);
 	cv::imshow("SceneFlow", sf_image);
 	cv::waitKey(100000);
 

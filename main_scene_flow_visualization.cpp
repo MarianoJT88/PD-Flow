@@ -23,6 +23,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "scene_flow_visualization.h"
 
 
@@ -57,13 +58,13 @@ int main(int num_arg, char *argv[])
 		for (int i=1; i<num_arg; i++)
 		{
 			if ( string(argv[i]) == "--cam_mode")
-				cam_mode = stof(string(argv[i+1]));
+                cam_mode = strtof(argv[i+1], NULL);
 
 			if ( string(argv[i]) == "--fps")
-				fps = stof(string(argv[i+1]));
+                fps = strtof(argv[i+1], NULL);
 
 			if ( string(argv[i]) == "--rows")
-				rows = stof(string(argv[i+1]));
+                rows = strtof(argv[i+1], NULL);
 		}
 	}
 

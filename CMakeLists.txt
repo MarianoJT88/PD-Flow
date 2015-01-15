@@ -39,8 +39,10 @@ IF (BUILD_RT_VISUALIZATION)
 
 	INCLUDE_DIRECTORIES($ENV{OPENNI2_INCLUDE})
 	LINK_DIRECTORIES($ENV{OPENNI2_LIB})
-	#SET(OpenNI_lib "/usr/lib/libOpenNI2.so")
-	SET(OpenNI_lib "C:/Users/Mariano/Programas/OpenNI2_32/Lib/OpenNI2.lib")
+	SET(OpenNI_lib "/usr/lib/libOpenNI2.so")
+	#SET(OpenNI_lib "C:/Users/Mariano/Programas/OpenNI2_32/Lib/OpenNI2.lib")
+
+	#message( "jajaj y esto vale ${OPENNI2_INCLUDE}" )
 
 	ADD_EXECUTABLE(Scene-Flow-Visualization  
 		main_scene_flow_visualization.cpp

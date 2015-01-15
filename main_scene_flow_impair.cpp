@@ -23,6 +23,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "scene_flow_impair.h"
 
 using namespace std;
@@ -47,13 +48,14 @@ int main(int num_arg, char *argv[])
 		printf(" --help: Shows this menu... \n\n");
 		printf(" --rows r: Number of rows at the finest level of the pyramid. \n");
 		printf("\t   Options: r=15, r=30, r=60, r=120, r=240, r=480 (if VGA)\n");
-		std::getchar();
+        std::getwchar(); //Windows -> getchar();
 		return 1;
 	}
 	else
 	{
 		if ( string(argv[1]) == "--rows")
-			rows = stof(string(argv[2]));
+            //Windows -> rows = stof(string(argv[2]));
+            rows = strtof(argv[2], NULL);
 	}
 
 	//==============================================================================
@@ -73,7 +75,7 @@ int main(int num_arg, char *argv[])
 		sceneflow.solveSceneFlowGPU();
 		sceneflow.showAndSaveResults();
 		sceneflow.freeGPUMemory();
-		printf("\nPush any key over the scene flow image to finish");
+        printf("\nPush any key over the scene flow image to finish\n");
 	}
 
 	return 0;

@@ -25,16 +25,17 @@
 #include <mrpt/system.h>
 #include <mrpt/gui/CDisplayWindow3D.h>
 #include <mrpt/opengl.h>
-#include <OpenNI.h> //<openni2/OpenNI.h>
+//Windows #include <OpenNI.h>
+#include <openni2/OpenNI.h>
 #include <Eigen/src/Core/Matrix.h>
 #include "pdflow_cudalib.h"
 #include "legend_pdflow.xpm"
 
 //#define M_LOG2E 1.44269504088896340736f //log2(e)
 
-inline float log2(const float x){
-    return  log(x) * M_LOG2E;
-}
+//inline float log2(const float x){
+//    return  log(x) * M_LOG2E;
+//}
 
 
 using namespace mrpt;

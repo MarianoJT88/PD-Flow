@@ -21,18 +21,21 @@
 **																			**
 *****************************************************************************/
 
-#include <opencv2/core.hpp>
-#include <opencv2/highgui.hpp>
+//Windows -> #include <opencv2/core.hpp>
+#include <opencv2/core/core.hpp>
+//Windows -> #include <opencv2/highgui.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include "pdflow_cudalib.h"
 #include "legend_pdflow.xpm"
 #include <ostream>
 
-#define M_PI 3.14159265f
-#define M_LOG2E 1.44269504088896340736f //log2(e)
+//Windows -> #define M_PI 3.14159265f
+//Windows -> #define M_LOG2E 1.44269504088896340736f //log2(e)
 
-inline float log2(const float x){
-    return  log(x) * M_LOG2E;
-}
+//Windows
+//inline float log2(const float x){
+//    return  log(x) * M_LOG2E;
+//}
 
 
 class PD_flow_opencv {
