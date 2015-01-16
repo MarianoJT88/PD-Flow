@@ -25,17 +25,21 @@
 #include <mrpt/system.h>
 #include <mrpt/gui/CDisplayWindow3D.h>
 #include <mrpt/opengl.h>
-//Windows #include <OpenNI.h>
+#if BUILD_PLATFORM == WINDOWS_BUILD
+#include <OpenNI.h>
+#elif BUILD_PLATFORM == LINUX_BUILD
 #include <openni2/OpenNI.h>
+#endif
 #include <Eigen/src/Core/Matrix.h>
 #include "pdflow_cudalib.h"
 #include "legend_pdflow.xpm"
 
-//#define M_LOG2E 1.44269504088896340736f //log2(e)
+#if BUILD_PLATFORM == WINDOWS_BUILD
 
-//inline float log2(const float x){
-//    return  log(x) * M_LOG2E;
-//}
+//#define M_LOG2E 1.44269504088896340736f //log2(e)
+inline float log2(const float x){ return  log(x) * M_LOG2E; }
+
+#endif
 
 
 using namespace mrpt;

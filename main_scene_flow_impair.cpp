@@ -54,8 +54,7 @@ int main(int num_arg, char *argv[])
 	else
 	{
 		if ( string(argv[1]) == "--rows")
-            //Windows -> rows = stof(string(argv[2]));
-            rows = strtof(argv[2], NULL);
+            rows = stoi(argv[2], NULL);
 	}
 
 	//==============================================================================

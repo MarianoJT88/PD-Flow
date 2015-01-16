@@ -58,13 +58,14 @@ int main(int num_arg, char *argv[])
 		for (int i=1; i<num_arg; i++)
 		{
 			if ( string(argv[i]) == "--cam_mode")
-                cam_mode = strtof(argv[i+1], NULL);
+                cam_mode = stoi(argv[i+1], NULL);
 
 			if ( string(argv[i]) == "--fps")
-                fps = strtof(argv[i+1], NULL);
+				fps = stoi(argv[i+1], NULL);
+                //fps = strtof(argv[i+1], NULL);
 
 			if ( string(argv[i]) == "--rows")
-                rows = strtof(argv[i+1], NULL);
+                rows = stoi(argv[i+1], NULL);
 		}
 	}
 

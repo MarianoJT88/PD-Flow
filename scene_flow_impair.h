@@ -21,21 +21,26 @@
 **																			**
 *****************************************************************************/
 
-//Windows -> #include <opencv2/core.hpp>
+#if BUILD_PLATFORM == WINDOWS_BUILD
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#elif BUILD_PLATFORM == LINUX_BUILD
 #include <opencv2/core/core.hpp>
-//Windows -> #include <opencv2/highgui.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#endif
+
 #include "pdflow_cudalib.h"
 #include "legend_pdflow.xpm"
 #include <ostream>
 
-//Windows -> #define M_PI 3.14159265f
-//Windows -> #define M_LOG2E 1.44269504088896340736f //log2(e)
 
-//Windows
-//inline float log2(const float x){
-//    return  log(x) * M_LOG2E;
-//}
+#if BUILD_PLATFORM == WINDOWS_BUILD
+
+#define M_PI 3.14159265f
+#define M_LOG2E 1.44269504088896340736f //log2(e)
+inline float log2(const float x){ return  log(x) * M_LOG2E; }
+
+#endif
 
 
 class PD_flow_opencv {

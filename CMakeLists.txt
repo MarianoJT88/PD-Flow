@@ -11,7 +11,7 @@ set(CUDA_NVCC_FLAGS "-arch=sm_20")
 
 #Build scene flow CUDA lib
 CUDA_ADD_LIBRARY(pdflow_cudalib pdflow_cudalib.h pdflow_cudalib.cu)
-#message( ${CUDA_LIBRARIES} )
+
 
 SET(DEFAULT_BUILD_EVALUATOR ON)
 SET(BUILD_EVALUATOR ${DEFAULT_BUILD_EVALUATOR} CACHE BOOL "Build the scene flow evaluator for a RGB-D frame pair that uses OpenCV")
@@ -32,17 +32,22 @@ IF (BUILD_EVALUATOR)
 ENDIF (BUILD_EVALUATOR)
 
 SET(DEFAULT_BUILD_RT_VISUALIZATION ON)
-SET(BUILD_RT_VISUALIZATION ${DEFAULT_BUILD_RT_VISUALIZATION} CACHE BOOL "Build the scene flow estimator with real-time visualization that uses MRPT and OpenNI2")
+SET(BUILD_RT_VISUALIZATION ${DEFAULT_BUILD_RT_VISUALIZATION} CACHE BOOL "Build the scene flow estimator with real-time visualization that requires MRPT and OpenNI2")
 
 IF (BUILD_RT_VISUALIZATION)
 	FIND_PACKAGE(MRPT REQUIRED base gui opengl)
 
-	INCLUDE_DIRECTORIES($ENV{OPENNI2_INCLUDE})
-	LINK_DIRECTORIES($ENV{OPENNI2_LIB})
-	SET(OpenNI_lib "/usr/lib/libOpenNI2.so")
-	#SET(OpenNI_lib "C:/Users/Mariano/Programas/OpenNI2_32/Lib/OpenNI2.lib")
+	IF (WIN32)
+		INCLUDE_DIRECTORIES($ENV{OPENNI2_INCLUDE})
+		LINK_DIRECTORIES($ENV{OPENNI2_LIB})
+		SET(OpenNI_lib "$ENV{OPENNI2_LIB}/OpenNI2.lib")
+	ENDIF (WIN32)
+	
+	IF (UNIX)
+		SET(OpenNI_lib "/usr/lib/libOpenNI2.so")
+	ENDIF (UNIX)
 
-	#message( "jajaj y esto vale ${OPENNI2_INCLUDE}" )
+	message( "esto vale ${OpenNI_lib}" )
 
 	ADD_EXECUTABLE(Scene-Flow-Visualization  
 		main_scene_flow_visualization.cpp
