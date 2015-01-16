@@ -23,7 +23,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include "scene_flow_impair.h"
 
 using namespace std;
@@ -48,13 +48,13 @@ int main(int num_arg, char *argv[])
 		printf(" --help: Shows this menu... \n\n");
 		printf(" --rows r: Number of rows at the finest level of the pyramid. \n");
 		printf("\t   Options: r=15, r=30, r=60, r=120, r=240, r=480 (if VGA)\n");
-        std::getwchar(); //Windows -> getchar();
+        getwchar();
 		return 1;
 	}
 	else
 	{
 		if ( string(argv[1]) == "--rows")
-            rows = stoi(argv[2], NULL);
+            rows = stoi(argv[2]);
 	}
 
 	//==============================================================================

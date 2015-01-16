@@ -23,9 +23,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include "scene_flow_visualization.h"
-
 
 
 // ------------------------------------------------------
@@ -50,7 +49,7 @@ int main(int num_arg, char *argv[])
 		printf(" --fps f: The scene flow frame rate (Hz). \n\n");
 		printf(" --rows r: Number of rows at the finest level of the pyramid. \n");
 		printf("\t   Options: r=15, r=30, r=60, r=120, r=240, r=480 (if VGA)\n");
-		system::os::getch();
+        getwchar();
 		return 1;
 	}
 	else
@@ -58,14 +57,14 @@ int main(int num_arg, char *argv[])
 		for (int i=1; i<num_arg; i++)
 		{
 			if ( string(argv[i]) == "--cam_mode")
-                cam_mode = stoi(argv[i+1], NULL);
+                cam_mode = stoi(argv[i+1]);
 
 			if ( string(argv[i]) == "--fps")
-				fps = stoi(argv[i+1], NULL);
+                fps = stoi(argv[i+1]);
                 //fps = strtof(argv[i+1], NULL);
 
 			if ( string(argv[i]) == "--rows")
-                rows = stoi(argv[i+1], NULL);
+                rows = stoi(argv[i+1]);
 		}
 	}
 

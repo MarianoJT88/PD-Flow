@@ -47,7 +47,7 @@ IF (BUILD_RT_VISUALIZATION)
 		SET(OpenNI_lib "/usr/lib/libOpenNI2.so")
 	ENDIF (UNIX)
 
-	message( "esto vale ${OpenNI_lib}" )
+	message( "esto vale $ENV{OPENNI2_INCLUDE}" )
 
 	ADD_EXECUTABLE(Scene-Flow-Visualization  
 		main_scene_flow_visualization.cpp

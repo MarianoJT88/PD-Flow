@@ -21,12 +21,14 @@
 **																			**
 *****************************************************************************/
 
-#if BUILD_PLATFORM == WINDOWS_BUILD
-#include <opencv2/core.hpp>
-#include <opencv2/highgui.hpp>
-#elif BUILD_PLATFORM == LINUX_BUILD
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
+//#if BUILD_PLATFORM == WINDOWS_BUILD
+#ifdef _WIN32
+    #include <opencv2/core.hpp>
+    #include <opencv2/highgui.hpp>
+//#elif BUILD_PLATFORM == LINUX_BUILD
+#elif __linux
+    #include <opencv2/core/core.hpp>
+    #include <opencv2/highgui/highgui.hpp>
 #endif
 
 #include "pdflow_cudalib.h"
@@ -34,11 +36,14 @@
 #include <ostream>
 
 
-#if BUILD_PLATFORM == WINDOWS_BUILD
+//#if BUILD_PLATFORM == WINDOWS_BUILD
+#ifdef _WIN32
+    #define M_PI 3.14159265f
+    #define M_LOG2E 1.44269504088896340736f //log2(e)
+    inline float log2(const float x){ return  log(x) * M_LOG2E; }
 
-#define M_PI 3.14159265f
-#define M_LOG2E 1.44269504088896340736f //log2(e)
-inline float log2(const float x){ return  log(x) * M_LOG2E; }
+#elif __linux
+    inline int stoi(char *c) {return int(std::strtol(c,NULL,10));}
 
 #endif
 
