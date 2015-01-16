@@ -44,7 +44,10 @@ IF (BUILD_RT_VISUALIZATION)
 	ENDIF (WIN32)
 	
 	IF (UNIX)
-		SET(OpenNI_lib "/usr/lib/libOpenNI2.so")
+		SET(OpenNI2_libdir "/usr/lib")
+		INCLUDE_DIRECTORIES("/usr/include/openni2")
+		LINK_DIRECTORIES(${OpenNI2_libdir})
+		SET(OpenNI_lib "${OpenNI2_libdir}/libOpenNI2.so")
 	ENDIF (UNIX)
 
 	message( "esto vale $ENV{OPENNI2_INCLUDE}" )

@@ -28,11 +28,7 @@
 #include <Eigen/src/Core/Matrix.h>
 #include "pdflow_cudalib.h"
 #include "legend_pdflow.xpm"
-#ifdef _WIN32
-    #include <OpenNI.h>
-#elif __linux
-    #include <openni2/OpenNI.h>
-#endif
+#include <OpenNI.h>
 
 #ifdef _WIN32
     inline float log2(const float x){ return  log(x) * M_LOG2E;}
