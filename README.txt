@@ -53,11 +53,11 @@ intensity images - 8 bit in PNG. Resolution of VGA or QVGA
 					
 depth images - 16 bit monochrome in PNG, scaled by 5000. Resolution of VGA or QVGA
                Clue: Use cv::Mat image_name(height, width, CV_16U) and
-               cv::imwrite(filename, image_name) to store them.
-               Multiply the real depth by 5000.
+                     cv::imwrite(filename, image_name) to store them.
+                     Multiply the real depth by 5000.
 
 
-The algorithm convergence is set to a fixed number of iterations at each level, which increases with the level resolution. You can change it at your convenience by modifying the variable num_max_iter[].
+The algorithm convergence is set to a fixed number of iterations at each level of the coarse-to-fine scheme, and depends on the amount of levels and the level itself. If necessary, it can be changed by modifying the variable num_max_iter[].
 
 The number of Threads and Blocks that the GPU utilizes is also set to a fixed value. You can adapt it to your own device (GPU) to get the best performance. In any case, the number of threads should be higher than 25.
 
