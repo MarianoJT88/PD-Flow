@@ -24,18 +24,17 @@
 #ifdef _WIN32
     #include <opencv2/core.hpp>
     #include <opencv2/highgui.hpp>
-
+	#include <io.h>
 #elif __linux
     #include <opencv2/core/core.hpp>
     #include <opencv2/highgui/highgui.hpp>
+	#include <unistd.h>
 #endif
 
-#include "pdflow_cudalib.h"
-#include "legend_pdflow.xpm"
 #include <fstream>
 #include <string.h>
-//#include <io.h>
-#include <unistd.h>
+#include "pdflow_cudalib.h"
+#include "legend_pdflow.xpm"
 
 #ifdef _WIN32
     #define M_PI 3.14159265f
