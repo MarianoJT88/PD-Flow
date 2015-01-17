@@ -21,9 +21,6 @@
 **																			**
 *****************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
-//#include <stdlib.h>
 #include "scene_flow_visualization.h"
 
 
@@ -61,7 +58,6 @@ int main(int num_arg, char *argv[])
 
 			if ( string(argv[i]) == "--fps")
                 fps = stoi(argv[i+1]);
-                //fps = strtof(argv[i+1], NULL);
 
 			if ( string(argv[i]) == "--rows")
                 rows = stoi(argv[i+1]);

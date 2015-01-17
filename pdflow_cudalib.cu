@@ -42,7 +42,7 @@ __host__ void CSF_cuda::allocateDevMemory()
 
     for (unsigned int i = 0; i<pyr_levels; i++)
     {
-        s = powf(2,i);
+        s = static_cast<unsigned int>(powf(2,i));
         cudaMalloc((void**)&colour_dev[i], width*height*sizeof(float)/(s*s) );
         cudaMalloc((void**)&colour_old_dev[i], width*height*sizeof(float)/(s*s) );
         cudaMalloc((void**)&depth_dev[i], width*height*sizeof(float)/(s*s) );
@@ -189,7 +189,7 @@ __host__ void CSF_cuda::readParameters(unsigned int rows_host, unsigned int cols
     fovv = fovv_host;
     f_dist = f_dist_host;
 
-    //Allocate gaussian mask
+    //Allocate  and copy gaussian mask
     cudaError_t err = cudaMalloc((void**)&g_mask_dev, 5*5*sizeof(float));
     //printf("%s", cudaGetErrorString(err));
     cudaMemcpy(g_mask_dev, g_mask, 5*5*sizeof(float), cudaMemcpyHostToDevice);
@@ -802,7 +802,7 @@ __device__ void CSF_cuda::computeStepSizes(unsigned int index)
 //=============================================================================
 __device__ void CSF_cuda::updateDualVariables(unsigned int index)
 {
-	//Create aux variables
+	//Create aux variables to avoid repetitive global memory access
     float module_p;
 	float pd = pd_dev[index], puu = puu_dev[index], puv = puv_dev[index];
 	float pvu = pvu_dev[index], pvv = pvv_dev[index], pwu = pwu_dev[index], pwv = pwv_dev[index];
@@ -1035,7 +1035,8 @@ __device__ void CSF_cuda::filterSolution(unsigned int index)
     const unsigned int v = index%rows_i;
     const unsigned int u = index/rows_i;
 
-	//Median filter
+	//								Weighted median filter
+	//----------------------------------------------------------------------------------------
 	fieldAndPresence up[9], vp[9], wp[9];
     float pres_cum_u[9], pres_cum_v[9], pres_cum_w[9], pres_med;
     int indr, indc, ind_loop;
@@ -1060,7 +1061,7 @@ __device__ void CSF_cuda::filterSolution(unsigned int index)
                     continue;
                 }
 
-                //Compute presence of every element
+                //Compute weights
                 const float pres = 1.f/(1.f + kd*powf(depth_old - depth_old_dev[level_image][ind_loop],2.f) + kddt*powf(ddt_dev[ind_loop],2.f));
 						
 				up[v_index].field = du_new_dev[ind_loop]; up[v_index].pres = pres;
@@ -1069,12 +1070,12 @@ __device__ void CSF_cuda::filterSolution(unsigned int index)
                 v_index++;
             }
 
-		//Sort vectors (both the solution and the presence)
+		//Sort vectors (both the solution and the weights)
 		bubbleSortDev(up, point_count);
 		bubbleSortDev(vp, point_count);
 		bubbleSortDev(wp, point_count);
 
-		//Compute cumulative presence
+		//Compute cumulative weight
 		pres_cum_u[0] = up[0].pres; pres_cum_v[0] = vp[0].pres; pres_cum_w[0] = wp[0].pres;
 		for (unsigned int i=1; i<point_count; i++)
 		{
@@ -1138,13 +1139,12 @@ __device__ void CSF_cuda::filterSolution(unsigned int index)
 
 __device__ void CSF_cuda::computeMotionField(unsigned int index)
 {
-    //Fill the matrices dx,dy,dz with the final solution
-    const float x_incr = 2.f*f_dist*tanf(0.5f*fovh)/(cols_i-1);	//In meters
-    const float y_incr = 2.f*f_dist*tanf(0.5f*fovv)/(rows_i-1);	//In meters
+    const float x_incr = 2.f*f_dist*tanf(0.5f*fovh)/(cols_i-1);
+    const float y_incr = 2.f*f_dist*tanf(0.5f*fovv)/(rows_i-1);
     const float fx = f_dist/x_incr;
     const float fy = f_dist/y_incr;
 
-
+    //Fill the matrices dx,dy,dz with the scene flow estimate
     if (depth_old_dev[level_image][index] > 0)
     {
         dx_dev[index] = dw_l_dev[index];
@@ -1240,7 +1240,7 @@ void MotionFieldBridge(CSF_cuda *csf)
 
 void DebugBridge(CSF_cuda *csf_device)
 {
-    printf("Entro en el debug bridge");
+    printf("Executing debug kernel");
     DebugKernel <<<1,1>>>(csf_device);
 }
 
@@ -1255,8 +1255,9 @@ void BridgeBack(CSF_cuda *csf_host, CSF_cuda *csf_device)
 //=============================================================================
 __global__ void DebugKernel(CSF_cuda *csf)
 {
-    printf("\n dx: ");
-    for (unsigned int i = 0; i< (csf->rows_i)*(csf->cols_i); i++)  //(csf->rows)*(csf->cols)
+    //Add here the code you want to use for debugging
+	printf("\n dx: ");
+    for (unsigned int i = 0; i< (csf->rows_i)*(csf->cols_i); i++)
         printf(" %f", csf->dx_dev[i]);
 
 }

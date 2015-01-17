@@ -21,11 +21,10 @@
 **																			**
 *****************************************************************************/
 
-//#if BUILD_PLATFORM == WINDOWS_BUILD
 #ifdef _WIN32
     #include <opencv2/core.hpp>
     #include <opencv2/highgui.hpp>
-//#elif BUILD_PLATFORM == LINUX_BUILD
+
 #elif __linux
     #include <opencv2/core/core.hpp>
     #include <opencv2/highgui/highgui.hpp>
@@ -33,10 +32,10 @@
 
 #include "pdflow_cudalib.h"
 #include "legend_pdflow.xpm"
-#include <ostream>
+#include <fstream>
+#include <string.h>
+#include <io.h>
 
-
-//#if BUILD_PLATFORM == WINDOWS_BUILD
 #ifdef _WIN32
     #define M_PI 3.14159265f
     #define M_LOG2E 1.44269504088896340736f //log2(e)
@@ -48,13 +47,17 @@
 #endif
 
 
+
+//==================================================================
+//					PD-Flow class (using openCV)
+//==================================================================
+
 class PD_flow_opencv {
 public:
 
-    float len_disp;         //In meters
-    unsigned int cam_mode;	// (1 - 640 x 480, 2 - 320 x 240, 4 - 160 x 120)
+    unsigned int cam_mode;	// (1 - 640 x 480, 2 - 320 x 240)
     unsigned int ctf_levels;//Number of levels used in the coarse-to-fine scheme (always dividing by two)
-    unsigned int num_max_iter[6];  //Max number of iterations distributed homogeneously between all levels
+    unsigned int num_max_iter[6];  //Number of iterations at every pyramid level (primal-dual solver)
     float g_mask[25];
 	
     //Matrices that store the original images
@@ -70,9 +73,10 @@ public:
 	float *dxp, *dyp, *dzp;
 
     //Camera properties
+	float len_disp; //In meters
     float f_dist;	//In meters
-    float fovh;     //Here it is expressed in radians
-    float fovv;     //Here it is expressed in radians
+    float fovh;     //In radians
+    float fovv;     //In radians
 
     //Max resolution of the coarse-to-fine scheme.
     unsigned int rows;

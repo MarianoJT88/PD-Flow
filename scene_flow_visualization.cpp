@@ -25,21 +25,24 @@
 
 PD_flow_mrpt::PD_flow_mrpt(unsigned int cam_mode_config, unsigned int fps_config, unsigned int rows_config)
 {     
-    rows = rows_config;      //Maximum size of the coarse-to-fine scheme
+    rows = rows_config;      //Maximum size of the coarse-to-fine scheme - Default 240 (QVGA)
     cols = rows*320/240;
-    cam_mode = cam_mode_config;   // (1 - 640 x 480, 2 - 320 x 240)
+    cam_mode = cam_mode_config;   // (1 - 640 x 480, 2 - 320 x 240), Default - 1
     ctf_levels = round(log2(rows/15)) + 1;
     fovh = M_PI*62.5f/180.f;
     fovv = M_PI*45.f/180.f;
     len_disp = 0.022f;
-    num_max_iter[0] = 40;
-    num_max_iter[1] = 50;
-    num_max_iter[2] = 60;
-    num_max_iter[3] = 80;
-    num_max_iter[4] = 0;
-    num_max_iter[5] = 0;
+	fps = fps_config;		//In Hz, Default - 30
 
-    fps = fps_config;		//In Hz
+	//Iterations of the primal-dual solver at each pyramid level.
+	//Maximum value set to 100 at the finest level
+	for (int i=5; i>=0; i--)
+	{
+		if (i >= ctf_levels - 1)
+			num_max_iter[i] = 100;	
+		else
+			num_max_iter[i] = num_max_iter[i+1]-15;
+	}
 
     //Compute gaussian mask
 	float v_mask[5] = {1.f,4.f,6.f,4.f,1.f};
@@ -110,24 +113,17 @@ PD_flow_mrpt::PD_flow_mrpt(unsigned int cam_mode_config, unsigned int fps_config
 
 void PD_flow_mrpt::createImagePyramidGPU()
 {
-    //utils::CTicTac clock;
-    //clock.Tic();
-
-    //Cuda copy new frames
+    //Copy new frames to the scene flow object
     csf_host.copyNewFrames(colour_wf.data(), depth_wf.data());
 
-    //Cuda copy object to device
+    //Copy scene flow object to device
     csf_device = ObjectToDevice(&csf_host);
 
     unsigned int pyr_levels = round(log2(640/(cam_mode*cols))) + ctf_levels;
     GaussianPyramidBridge(csf_device, pyr_levels, cam_mode);
 
-    //Cuda copy object back to host
+    //Copy scene flow object back to host
     BridgeBack(&csf_host, csf_device);
-
-	////Execution results
-	//const float aux_time = 1000.f*clock.Tac();
-    //cout << endl << "Time for the pyramid: " << aux_time << "ms";
 }
 
 void PD_flow_mrpt::solveSceneFlowGPU()
@@ -178,6 +174,7 @@ void PD_flow_mrpt::solveSceneFlowGPU()
         //Compute mu_uv and step sizes for the primal-dual algorithm
         MuAndStepSizesBridge(csf_device);
 
+		//Primal-Dual solver
         for (num_iter = 0; num_iter < num_max_iter[i]; num_iter++)
         {
             GradientBridge(csf_device);
@@ -195,10 +192,10 @@ void PD_flow_mrpt::solveSceneFlowGPU()
         //BridgeBack
         BridgeBack(&csf_host, csf_device);
 
-        //Free variables of this level
+        //Free variables of variables associated to this level
         csf_host.freeLevelVariables();
 
-        //Copy motion field to CPU
+        //Copy motion field and images to CPU
 		csf_host.copyAllSolutions(dx[ctf_levels-i-1].data(), dy[ctf_levels-i-1].data(), dz[ctf_levels-i-1].data(),
                         depth[level_image].data(), depth_old[level_image].data(), colour[level_image].data(), colour_old[level_image].data(),
                         xx[level_image].data(), xx_old[level_image].data(), yy[level_image].data(), yy_old[level_image].data());
@@ -239,11 +236,12 @@ bool PD_flow_mrpt::OpenCamera()
 	//========================================================================================
     rc = device.setImageRegistrationMode(openni::IMAGE_REGISTRATION_DEPTH_TO_COLOR);
 
-    options = rgb.getVideoMode();		//In rgb the resolution can't be set to (160,120)
+    options = rgb.getVideoMode();
     if (cam_mode == 1)
         options.setResolution(640,480);
     else
         options.setResolution(320,240);
+
     rc = rgb.setVideoMode(options);
     rc = rgb.setMirroringEnabled(false);
 
@@ -252,6 +250,7 @@ bool PD_flow_mrpt::OpenCamera()
         options.setResolution(640,480);
     else
         options.setResolution(320,240);
+
     rc = dimage.setVideoMode(options);
     rc = dimage.setMirroringEnabled(false);
 
@@ -305,11 +304,11 @@ void PD_flow_mrpt::CaptureFrame()
     const int width = framergb.getWidth();
 
     if ((framed.getWidth() != framergb.getWidth()) || (framed.getHeight() != framergb.getHeight()))
-        cout << endl << "Both frames don't have the same size.";
+        cout << endl << "The RGB and the depth frames don't have the same size.";
 
     else
     {
-        //Read one frame
+        //Read new frame
         const openni::DepthPixel* pDepthRow = (const openni::DepthPixel*)framed.getData();
         const openni::RGB888Pixel* pRgbRow = (const openni::RGB888Pixel*)framergb.getData();
         int rowSize = framergb.getStrideInBytes() / sizeof(openni::RGB888Pixel);
@@ -362,7 +361,7 @@ void PD_flow_mrpt::initializeScene()
     fpoints_gl->setPointSize(3.0);
     scene->insert( fpoints_gl );
 
-    //Scene Flow
+    //Scene Flow (includes initial point cloud)
     opengl::CVectorField3DPtr sf = opengl::CVectorField3D::Create();
     sf->setPointSize(3.0f);
     sf->setLineWidth(2.0f);
@@ -403,7 +402,8 @@ void PD_flow_mrpt::updateScene()
                 fpoints_gl->insertPoint(depth[repr_level](v,u), xx[repr_level](v,u), yy[repr_level](v,u));
 
 
-    opengl::CVectorField3DPtr sf = scene->getByClass<opengl::CVectorField3D>(0);
+    //Scene flow
+	opengl::CVectorField3DPtr sf = scene->getByClass<opengl::CVectorField3D>(0);
 	sf->setPointCoordinates(depth_old[repr_level], xx_old[repr_level], yy_old[repr_level]);
     sf->setVectorField(dx[0], dy[0], dz[0]);
 

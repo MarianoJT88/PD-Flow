@@ -29,6 +29,8 @@
 #include "pdflow_cudalib.h"
 #include "legend_pdflow.xpm"
 #include <OpenNI.h>
+#include <stdio.h>
+#include <string.h>
 
 #ifdef _WIN32
     inline float log2(const float x){ return  log(x) * M_LOG2E;}
@@ -50,9 +52,8 @@ using Eigen::MatrixXf;
 class PD_flow_mrpt {
 public:
 
-    float len_disp;         //In meters
     float fps;              //In Hz
-    unsigned int cam_mode;	// (1 - 640 x 480, 2 - 320 x 240, 4 - 160 x 120)
+    unsigned int cam_mode;	// (1 - 640 x 480, 2 - 320 x 240)
     unsigned int ctf_levels;//Number of levels used in the coarse-to-fine scheme (always dividing by two)
     unsigned int num_max_iter[6];  //Max number of iterations distributed homogeneously between all levels
     float g_mask[25];
@@ -77,9 +78,10 @@ public:
     vector<MatrixXf> dz;
 
     //Camera properties
+	float len_disp; //In meters
     float f_dist;	//In meters
-    float fovh;     //Here it is expressed in radians
-    float fovv;     //Here it is expressed in radians
+    float fovh;     //In radians
+    float fovv;     //In radians
 
     //Max resolution of the coarse-to-fine scheme.
     unsigned int rows;
@@ -93,7 +95,7 @@ public:
     opengl::COpenGLScenePtr		scene;
     utils::CImage				image;
 
-    //Camera
+    //OpenNI2 - Camera
     openni::Status          rc;
     openni::Device          device;
     openni::VideoMode       options;
@@ -101,7 +103,6 @@ public:
 
     //Cuda
     CSF_cuda csf_host, *csf_device;
-
 
 	//Methods
     void createImagePyramidGPU();

@@ -34,6 +34,7 @@ ENDIF (BUILD_EVALUATOR)
 SET(DEFAULT_BUILD_RT_VISUALIZATION ON)
 SET(BUILD_RT_VISUALIZATION ${DEFAULT_BUILD_RT_VISUALIZATION} CACHE BOOL "Build the scene flow estimator with real-time visualization that requires MRPT and OpenNI2")
 
+#Build real-time scene flow with visualization
 IF (BUILD_RT_VISUALIZATION)
 	FIND_PACKAGE(MRPT REQUIRED base gui opengl)
 
@@ -49,8 +50,6 @@ IF (BUILD_RT_VISUALIZATION)
 		LINK_DIRECTORIES(${OpenNI2_libdir})
 		SET(OpenNI_lib "${OpenNI2_libdir}/libOpenNI2.so")
 	ENDIF (UNIX)
-
-	message( "esto vale $ENV{OPENNI2_INCLUDE}" )
 
 	ADD_EXECUTABLE(Scene-Flow-Visualization  
 		main_scene_flow_visualization.cpp

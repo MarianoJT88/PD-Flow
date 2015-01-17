@@ -25,8 +25,8 @@
 #include <cuda_runtime.h>
 #include <cuda.h>
 
-#define N_blocks 256    //128
-#define N_threads 128   //256
+#define N_blocks 256
+#define N_threads 128
 
 //Warning!!!!!! Number of threads should be higher than 25 - See definition of "computePyramidLevel()"
 

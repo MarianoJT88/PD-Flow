@@ -21,9 +21,6 @@
 **																			**
 *****************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
-//#include <stdlib.h>
 #include "scene_flow_impair.h"
 
 using namespace std;
@@ -36,9 +33,9 @@ using namespace std;
 int main(int num_arg, char *argv[])
 {	
 	//==============================================================================
-	//						Read function arguments
+	//								Read arguments
 	//==============================================================================
-	unsigned int rows = 240;	//Default values
+	unsigned int rows = 240;	//Default value
 
 	if (num_arg <= 1); //No arguments
 	else if ( string(argv[1]) == "--help")
