@@ -34,7 +34,8 @@
 #include "legend_pdflow.xpm"
 #include <fstream>
 #include <string.h>
-#include <io.h>
+//#include <io.h>
+#include <unistd.h>
 
 #ifdef _WIN32
     #define M_PI 3.14159265f

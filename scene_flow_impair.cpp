@@ -25,7 +25,7 @@
 
 bool  fileExists(const std::string& path)
 {
-	return 0 == _access(path.c_str(), 0x00 ); // 0x00 = Check for existence only!
+    return 0 == access(path.c_str(), 0x00 ); // 0x00 = Check for existence only!
 }
 
 PD_flow_opencv::PD_flow_opencv(unsigned int rows_config)
