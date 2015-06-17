@@ -31,7 +31,6 @@ PD_flow_mrpt::PD_flow_mrpt(unsigned int cam_mode_config, unsigned int fps_config
     ctf_levels = round(log2(rows/15)) + 1;
     fovh = M_PI*62.5f/180.f;
     fovv = M_PI*45.f/180.f;
-    len_disp = 0.022f;
 	fps = fps_config;		//In Hz, Default - 30
 
 	//Iterations of the primal-dual solver at each pyramid level.
@@ -106,9 +105,6 @@ PD_flow_mrpt::PD_flow_mrpt(unsigned int cam_mode_config, unsigned int fps_config
     lambda_i = 0.04f;
     lambda_d = 0.35f;
     mu = 75.f;
-
-    //Camera parameters
-    f_dist = 1.f/525.f;   //In meters
 }
 
 void PD_flow_mrpt::createImagePyramidGPU()
@@ -336,7 +332,7 @@ void PD_flow_mrpt::freeGPUMemory()
 void PD_flow_mrpt::initializeCUDA()
 {
     //Read parameters
-    csf_host.readParameters(rows, cols, lambda_i, lambda_d, mu, g_mask, ctf_levels, len_disp, cam_mode, fovh, fovv, f_dist);
+    csf_host.readParameters(rows, cols, lambda_i, lambda_d, mu, g_mask, ctf_levels, cam_mode, fovh, fovv);
 
     //Allocate memory
     csf_host.allocateDevMemory();
@@ -372,7 +368,7 @@ void PD_flow_mrpt::initializeScene()
 
     //Reference frame
     opengl::CSetOfObjectsPtr reference = opengl::stock_objects::CornerXYZ();
-    reference->setPose(CPose3D(0,len_disp,0,0,0,0));
+    reference->setPose(CPose3D(0,0,0,0,0,0));
 	reference->setScale(0.15f);
     scene->insert( reference );
 

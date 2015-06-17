@@ -46,10 +46,8 @@ public:
     float lambda_i;
     float lambda_d;
     float mu;
-    float lens_disp;
     float fovh;
     float fovv;
-    float f_dist;
 
     //Local values
     unsigned int local_level;
@@ -126,9 +124,8 @@ public:
 
     __host__ void allocateDevMemory();
     __host__ void allocateMemoryNewLevel(unsigned int rows_loc, unsigned int cols_loc, unsigned int level_i, unsigned int level_image_i);
-    __host__ void readParameters(unsigned int rows_host, unsigned int cols_host, float lambda_i_host, float lambda_d_host,
-                                 float mu_host, float *g_mask, unsigned int levels_host, float lens_displ_host,
-                                 unsigned int cam_mode_host, float fovh_host, float fovv_host, float f_dist_host);
+    __host__ void readParameters(unsigned int rows_host, unsigned int cols_host, float lambda_i_host, float lambda_d_host, float mu_host,
+								 float *g_mask, unsigned int levels_host, unsigned int cam_mode_host, float fovh_host, float fovv_host);
 
     __host__ void copyNewFrames(float *colour_wf, float *depth_wf);
     __host__ void freeDeviceMemory();

@@ -73,8 +73,6 @@ public:
 	float *dxp, *dyp, *dzp;
 
     //Camera properties
-	float len_disp; //In meters
-    float f_dist;	//In meters
     float fovh;     //In radians
     float fovv;     //In radians
 

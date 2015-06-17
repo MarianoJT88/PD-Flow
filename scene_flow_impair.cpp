@@ -34,8 +34,7 @@ PD_flow_opencv::PD_flow_opencv(unsigned int rows_config)
     cols = rows*320/240;
     ctf_levels = static_cast<unsigned int>(log2(float(rows/15))) + 1;
     fovh = M_PI*62.5f/180.f;
-    fovv = M_PI*45.f/180.f;
-    len_disp = 0.022f;
+    fovv = M_PI*48.5f/180.f;
 
 	//Iterations of the primal-dual solver at each pyramid level.
 	//Maximum value set to 100 at the finest level
@@ -63,9 +62,6 @@ PD_flow_opencv::PD_flow_opencv(unsigned int rows_config)
     lambda_i = 0.04f;
     lambda_d = 0.35f;
     mu = 75.f;
-
-    //Camera parameters
-    f_dist = 1.f/525.f;     //In meters
 }
 
 void PD_flow_opencv::createImagePyramidGPU()
@@ -81,7 +77,6 @@ void PD_flow_opencv::createImagePyramidGPU()
 
     //Copy scene flow object back to host
     BridgeBack(&csf_host, csf_device);
-
 }
 
 void PD_flow_opencv::solveSceneFlowGPU()
@@ -181,7 +176,7 @@ void PD_flow_opencv::initializeCUDA()
 	Z = (float *) malloc(sizeof(float)*width*height);   
 	
 	//Read parameters
-    csf_host.readParameters(rows, cols, lambda_i, lambda_d, mu, g_mask, ctf_levels, len_disp, cam_mode, fovh, fovv, f_dist);
+    csf_host.readParameters(rows, cols, lambda_i, lambda_d, mu, g_mask, ctf_levels, cam_mode, fovh, fovv);
 
     //Allocate memory
     csf_host.allocateDevMemory();

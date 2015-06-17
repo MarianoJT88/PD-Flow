@@ -173,9 +173,8 @@ CSF_cuda *ObjectToDevice(CSF_cuda *csf_host)
 
 //                Copy data from host to device and viceversa
 //=============================================================================
-__host__ void CSF_cuda::readParameters(unsigned int rows_host, unsigned int cols_host, float lambda_i_host, float lambda_d_host,
-                                       float mu_host, float *g_mask, unsigned int levels_host, float lens_displ_host,
-                                       unsigned int cam_mode_host, float fovh_host, float fovv_host, float f_dist_host)
+__host__ void CSF_cuda::readParameters(unsigned int rows_host, unsigned int cols_host, float lambda_i_host, float lambda_d_host, float mu_host,
+									   float *g_mask, unsigned int levels_host, unsigned int cam_mode_host, float fovh_host, float fovv_host)
 {
     rows = rows_host;
     cols = cols_host;
@@ -183,11 +182,9 @@ __host__ void CSF_cuda::readParameters(unsigned int rows_host, unsigned int cols
     lambda_d = lambda_d_host;
     mu = mu_host;
     ctf_levels = levels_host;
-    lens_disp = lens_displ_host;
     cam_mode = cam_mode_host;
     fovh = fovh_host;
     fovv = fovv_host;
-    f_dist = f_dist_host;
 
     //Allocate  and copy gaussian mask
     cudaError_t err = cudaMalloc((void**)&g_mask_dev, 5*5*sizeof(float));
@@ -424,11 +421,11 @@ __device__ void CSF_cuda::computePyramidLevel(unsigned int index, unsigned int l
     }
 
     //Calculate coordinates "xy" of the points
-    const float inv_f_i = float(640/cols_i)*f_dist;
+    const float inv_f_i = 2.f*tan(0.5f*fovh)/float(cols_i);
     const float disp_u_i = 0.5f*(cols_i-1);
     const float disp_v_i = 0.5f*(rows_i-1);
 
-    xx_dev[level][index] = (u - disp_u_i)*depth_dev[level][index]*inv_f_i + lens_disp;
+    xx_dev[level][index] = (u - disp_u_i)*depth_dev[level][index]*inv_f_i;
     yy_dev[level][index] = (v - disp_v_i)*depth_dev[level][index]*inv_f_i;
 }
 
@@ -787,14 +784,23 @@ __device__ void CSF_cuda::computeStepSizes(unsigned int index)
     //Load lambda from global memory
     const float lambdai = lambda_i, lambdad = lambda_d;
 	
-	sigma_pd_dev[index] = fdividef(1.f, mu_uv_dev[index]*(1.f + abs(ddt_dev[index]) + abs(ddu_dev[index]) + abs(ddv_dev[index])) + 1e-10f);
+	sigma_pd_dev[index] = fdividef(1.f, mu_uv_dev[index]*(1.f + abs(ddu_dev[index]) + abs(ddv_dev[index])) + 1e-10f);
     sigma_puvx_dev[index] = fdividef(0.5f, lambdai*ri_dev[index] + 1e-10f);
     sigma_puvy_dev[index] = fdividef(0.5f, lambdai*rj_dev[index] + 1e-10f);
     sigma_pwx_dev[index] = fdividef(0.5f, ri_dev[index]*lambdad + 1e-10f);
     sigma_pwy_dev[index] = fdividef(0.5f, rj_dev[index]*lambdad + 1e-10f);
-    tau_u_dev[index] = fdividef(1.f, mu_uv_dev[index]*abs(ddu_dev[index]) + 2.f*lambdai*(ri_dev[index] + rj_dev[index]) + 1e-10f);
-    tau_v_dev[index] = fdividef(1.f, mu_uv_dev[index]*abs(ddv_dev[index]) + 2.f*lambdai*(ri_dev[index] + rj_dev[index]) + 1e-10f);
-    tau_w_dev[index] = fdividef(1.f, mu_uv_dev[index] + 2.f*lambdad*(ri_dev[index] + rj_dev[index]) + 1e-10f);
+
+	//Calculate (v,u)
+    const unsigned int v = index%rows_i;
+    const unsigned int u = index/rows_i;
+
+	float acu_r = ri_dev[index] + rj_dev[index];
+	if (u > 0) acu_r += ri_dev[index-rows_i];
+	if (v > 0) acu_r += rj_dev[index-1];
+
+    tau_u_dev[index] = fdividef(1.f, mu_uv_dev[index]*abs(ddu_dev[index]) + lambdai*acu_r + 1e-10f);
+    tau_v_dev[index] = fdividef(1.f, mu_uv_dev[index]*abs(ddv_dev[index]) + lambdai*acu_r + 1e-10f);
+    tau_w_dev[index] = fdividef(1.f, mu_uv_dev[index] + lambdad*acu_r + 1e-10f);
 }
 
 
@@ -937,15 +943,15 @@ __device__ void CSF_cuda::computeDivergence(unsigned int index)
     }
     else if (u == cols_i-1)
     {
-        divpu_dev[index] = -ri_dev[index]*puu_dev[index-rows_i];
-        divpv_dev[index] = -ri_dev[index]*pvu_dev[index-rows_i];
-        divpw_dev[index] = -ri_dev[index]*pwu_dev[index-rows_i];
+        divpu_dev[index] = -ri_dev[index-rows_i]*puu_dev[index-rows_i];
+        divpv_dev[index] = -ri_dev[index-rows_i]*pvu_dev[index-rows_i];
+        divpw_dev[index] = -ri_dev[index-rows_i]*pwu_dev[index-rows_i];
     }
     else
     {
-        divpu_dev[index] = ri_dev[index]*(puu_dev[index] - puu_dev[index-rows_i]);
-        divpv_dev[index] = ri_dev[index]*(pvu_dev[index] - pvu_dev[index-rows_i]);
-        divpw_dev[index] = ri_dev[index]*(pwu_dev[index] - pwu_dev[index-rows_i]);
+        divpu_dev[index] = ri_dev[index]*puu_dev[index] - ri_dev[index-rows_i]*puu_dev[index-rows_i];
+        divpv_dev[index] = ri_dev[index]*pvu_dev[index] - ri_dev[index-rows_i]*pvu_dev[index-rows_i];
+        divpw_dev[index] = ri_dev[index]*pwu_dev[index] - ri_dev[index-rows_i]*pwu_dev[index-rows_i];
     }
 
     //Second term
@@ -957,15 +963,15 @@ __device__ void CSF_cuda::computeDivergence(unsigned int index)
     }
     else if (v == rows_i-1)
     {
-        divpu_dev[index] += -rj_dev[index]*puv_dev[index-1];
-        divpv_dev[index] += -rj_dev[index]*pvv_dev[index-1];
-        divpw_dev[index] += -rj_dev[index]*pwv_dev[index-1];
+        divpu_dev[index] += -rj_dev[index-1]*puv_dev[index-1];
+        divpv_dev[index] += -rj_dev[index-1]*pvv_dev[index-1];
+        divpw_dev[index] += -rj_dev[index-1]*pwv_dev[index-1];
     }
     else
     {
-        divpu_dev[index] += rj_dev[index]*(puv_dev[index] - puv_dev[index-1]);
-        divpv_dev[index] += rj_dev[index]*(pvv_dev[index] - pvv_dev[index-1]);
-        divpw_dev[index] += rj_dev[index]*(pwv_dev[index] - pwv_dev[index-1]);
+        divpu_dev[index] += rj_dev[index]*puv_dev[index] - rj_dev[index-1]*puv_dev[index-1];
+        divpv_dev[index] += rj_dev[index]*pvv_dev[index] - rj_dev[index-1]*pvv_dev[index-1];
+        divpw_dev[index] += rj_dev[index]*pwv_dev[index] - rj_dev[index-1]*pwv_dev[index-1];
     }
 }
 
@@ -1139,17 +1145,14 @@ __device__ void CSF_cuda::filterSolution(unsigned int index)
 
 __device__ void CSF_cuda::computeMotionField(unsigned int index)
 {
-    const float x_incr = 2.f*f_dist*tanf(0.5f*fovh)/(cols_i-1);
-    const float y_incr = 2.f*f_dist*tanf(0.5f*fovv)/(rows_i-1);
-    const float fx = f_dist/x_incr;
-    const float fy = f_dist/y_incr;
+	const float inv_f = 2.f*tanf(0.5f*fovh)/float(cols);
 
     //Fill the matrices dx,dy,dz with the scene flow estimate
     if (depth_old_dev[level_image][index] > 0)
     {
         dx_dev[index] = dw_l_dev[index];
-        dy_dev[index] = depth_old_dev[level_image][index]*du_l_dev[index]/fx + dw_l_dev[index]*xx_old_dev[level_image][index]/depth_old_dev[level_image][index];
-        dz_dev[index] = depth_old_dev[level_image][index]*dv_l_dev[index]/fy + dw_l_dev[index]*yy_old_dev[level_image][index]/depth_old_dev[level_image][index];
+        dy_dev[index] = depth_old_dev[level_image][index]*du_l_dev[index]*inv_f + dw_l_dev[index]*xx_old_dev[level_image][index]/depth_old_dev[level_image][index];
+        dz_dev[index] = depth_old_dev[level_image][index]*dv_l_dev[index]*inv_f + dw_l_dev[index]*yy_old_dev[level_image][index]/depth_old_dev[level_image][index];
     }
     else
     {
