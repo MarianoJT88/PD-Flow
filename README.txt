@@ -45,7 +45,13 @@ Both apps can read command line arguments. By adding the argument "--help" you w
 
 The coarsest level of the pyramid is always 15 x 20, so the total number of coarse-to-fine levels will depend on the parameter "rows". By default, rows = 240.
 
-The images that "Scene-Flow-Impair" reads must be named as "I1" (first intensity image), "I2" (second intensity image", "Z1" (first depth image) and "Z2" (second depth image) and must be located in the same directory as the executable. Furthermore, they must be saved with the following format:
+The images that "Scene-Flow-Impair" reads must be named as 
+    "i1.png" (first intensity image
+    "i2.png" (second intensity image")
+    "z1.png" (first depth image); and 
+    "z2.png" (second depth image) 
+
+Note these names are case sensitive and the files must be located in the same directory as the executable. Furthermore, they must be saved with the following format:
 
 intensity images - 8 bit in PNG. Resolution of VGA or QVGA
                    Clue: Use cv::Mat image_name(height, width, CV_8U) and
