@@ -28,8 +28,13 @@ bool  fileExists(const std::string& path)
     return 0 == access(path.c_str(), 0x00 ); // 0x00 = Check for existence only!
 }
 
-PD_flow_opencv::PD_flow_opencv(unsigned int rows_config)
-{     
+PD_flow_opencv::PD_flow_opencv(unsigned int rows_config, 
+	const char *intensity_filename_1, 
+	const char *intensity_filename_2,
+	const char *depth_filename_1,
+	const char *depth_filename_2,
+	const char* output_filename_root) {
+
     rows = rows_config;      //Maximum size of the coarse-to-fine scheme - Default 240 (QVGA)
     cols = rows*320/240;
     ctf_levels = static_cast<unsigned int>(log2(float(rows/15))) + 1;
@@ -62,7 +67,15 @@ PD_flow_opencv::PD_flow_opencv(unsigned int rows_config)
     lambda_i = 0.04f;
     lambda_d = 0.35f;
     mu = 75.f;
+
+    // Set file names
+    this->intensity_filename_1 = intensity_filename_1;
+    this->intensity_filename_2 = intensity_filename_2;
+    this->depth_filename_1 = depth_filename_1;
+    this->depth_filename_2 = depth_filename_2;
+    this->output_filename_root = output_filename_root;
 }
+
 
 void PD_flow_opencv::createImagePyramidGPU()
 {
@@ -209,15 +222,13 @@ void PD_flow_opencv::showImages()
 
 bool PD_flow_opencv::loadRGBDFrames()
 {
-	char name[100];
 	cv::Mat depth_float;
 
 	//First intensity image
-	sprintf(name, "i1.png");
-	intensity1 = cv::imread(name, CV_LOAD_IMAGE_GRAYSCALE);
+	intensity1 = cv::imread(intensity_filename_1, CV_LOAD_IMAGE_GRAYSCALE);
 	if (intensity1.empty())
 	{
-		printf("\nThe first intensity image (i1) cannot be found, please check that it is in the correct folder \n");
+		printf("\nThe first intensity image (%s) cannot be found, please check that it is in the correct folder \n", intensity_filename_1);
 		return 0;
 	}
 
@@ -226,11 +237,10 @@ bool PD_flow_opencv::loadRGBDFrames()
 			I[v + u*height] = float(intensity1.at<unsigned char>(v,u));
 
 	//First depth image
-	sprintf(name, "z1.png");
-	depth1 = cv::imread(name, -1);
+	depth1 = cv::imread(depth_filename_1, -1);
 	if (depth1.empty())
 	{
-		printf("\nThe first depth image (z1) cannot be found, please check that it is in the correct folder \n");
+		printf("\nThe first depth image (%s) cannot be found, please check that it is in the correct folder \n", depth_filename_1);
 		return 0;
 	}
 
@@ -243,11 +253,10 @@ bool PD_flow_opencv::loadRGBDFrames()
 
 
 	//Second intensity image
-	sprintf(name, "i2.png");
-	intensity2 = cv::imread(name, CV_LOAD_IMAGE_GRAYSCALE);
+	intensity2 = cv::imread(intensity_filename_2, CV_LOAD_IMAGE_GRAYSCALE);
 	if (intensity2.empty())
 	{
-		printf("\nThe second intensity image (i2) cannot be found, please check that it is in the correct folder \n");
+		printf("\nThe second intensity image (%s) cannot be found, please check that it is in the correct folder \n", intensity_filename_2);
 		return 0;
 	}
 
@@ -256,11 +265,10 @@ bool PD_flow_opencv::loadRGBDFrames()
 			I[v + u*height] = float(intensity2.at<unsigned char>(v,u));
 
 	//Second depth image
-	sprintf(name, "z2.png");
-	depth2 = cv::imread(name, -1);
+	depth2 = cv::imread(depth_filename_2, -1);
 	if (depth2.empty())
 	{
-		printf("\nThe second depth image (z2) cannot be found, please check that they are in the correct folder \n");
+		printf("\nThe second depth image (%s) cannot be found, please check that they are in the correct folder \n", depth_filename_2);
 		return 0;
 	}
 	depth2.convertTo(depth_float, CV_32FC1, 1.0 / 5000.0);
@@ -273,7 +281,7 @@ bool PD_flow_opencv::loadRGBDFrames()
 	return 1;
 }
 
-void PD_flow_opencv::showAndSaveResults()
+void PD_flow_opencv::showAndSaveResults( )
 {
 	//Save scene flow as an RGB image (one colour per direction)
 	cv::Mat sf_image(rows, cols, CV_8UC3);
@@ -308,14 +316,14 @@ void PD_flow_opencv::showAndSaveResults()
 
 
 	//Save the scene flow as a text file 
-	char	name[100];
+	char	name[500];
 	int     nFichero = 0;
 	bool    free_name = false;
 
 	while (!free_name)
 	{
 		nFichero++;
-		sprintf(name, "pdflow_results%02u.txt", nFichero );
+		sprintf(name, "%s%02u.txt", output_filename_root, nFichero );
 		free_name = !fileExists(name);
 	}
 	
@@ -337,7 +345,7 @@ void PD_flow_opencv::showAndSaveResults()
 	f_res.close();
 
 	//Save the RGB representation of the scene flow
-	sprintf(name, "pdflow_representation%02u.png", nFichero);
+	sprintf(name, "%s_representation%02u.png", output_filename_root, nFichero);
 	printf("Saving the visual representation to file: %s \n", name);
 	cv::imwrite(name, sf_image);
 }
