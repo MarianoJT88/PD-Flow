@@ -41,17 +41,21 @@ Both apps can read command line arguments. By adding the argument "--help" you w
 				
 --rows r: Number of rows at the finest level of the pyramid
           Options: r=15, r=30, r=60, r=120, r=240, r=480 (if VGA)
-			
 
 The coarsest level of the pyramid is always 15 x 20, so the total number of coarse-to-fine levels will depend on the parameter "rows". By default, rows = 240.
 
-The images that "Scene-Flow-Impair" reads must be named as 
-    "i1.png" (first intensity image
-    "i2.png" (second intensity image")
-    "z1.png" (first depth image); and 
-    "z2.png" (second depth image) 
 
-Note these names are case sensitive and the files must be located in the same directory as the executable. Furthermore, they must be saved with the following format:
+The images that "Scene-Flow-Impair" reads can be specified on the command line 
+
+--i1 <filename> : The file name of the first intensity image. Defaults to i1.png
+
+--i2 <filename> : The file name of the second intensity image. Defaults to i2.png
+
+--z1 <filename> : The file name of the first depth image. Defaults to z1.png
+
+--z2 <filename> : The file name of the second depth image. Defaults to z2.png
+
+Note these names are case sensitive and the files must be located in the same directory as the executable unless an absolute path is specified. Furthermore, they must be saved with the following format:
 
 intensity images - 8 bit in PNG. Resolution of VGA or QVGA
                    Clue: Use cv::Mat image_name(height, width, CV_8U) and
@@ -61,6 +65,12 @@ depth images - 16 bit monochrome in PNG, scaled by 5000. Resolution of VGA or QV
                Clue: Use cv::Mat image_name(height, width, CV_16U) and
                      cv::imwrite(filename, image_name) to store them.
                      Multiply the real depth by 5000.
+
+Scene-Flow_Impair writes outputs to two files, a text version containing the full scene flow and an image representation. The root of these files can be specified using 
+
+--out <root>    : The output file name root. Defaults to pdflow. 
+                  The results will be written to <root>_resultsNN.txt and root_representationNN.png 
+                  where NN is a two digit number.
 
 
 The algorithm convergence is set to a fixed number of iterations at each level of the coarse-to-fine scheme, and depends on the amount of levels and the level itself. If necessary, it can be changed by modifying the variable num_max_iter[].
