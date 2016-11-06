@@ -61,8 +61,8 @@ bool parse_arguments( int num_arg, char *argv[], Launch_args& args) {
 	args.intensity_filename_1 = "i1.png";
 	args.intensity_filename_2 = "i2.png";
 	args.depth_filename_1 = "z1.png";
-	args.depth_filename_1 = "z2.png";
-	args.output_filename_root = "out";
+	args.depth_filename_2 = "z2.png";
+	args.output_filename_root = "pdflow";
 
 	// Now check what's provided
 	bool parsed_ok = true;
@@ -144,7 +144,7 @@ int main(int num_arg, char *argv[])
  		printf(" --i2 <filename> The second RGB image file name. Defaults to i2.png\n" );
  		printf(" --z1 <filename> The first depth image file name. Defaults to z1.png\n" );
  		printf(" --z2 <filename> The second depth image file name. Defaults to z2.png\n" );
- 		printf(" --out <filename> The output file name root. Omit file extension. Defaults to \n" );
+ 		printf(" --out <filename> The output file name root. Omit file extension. Defaults to pdflow\n" );
         getwchar();
 		return 1;
 	}
@@ -153,7 +153,12 @@ int main(int num_arg, char *argv[])
 	//								Main operations
 	//==============================================================================
 
-	PD_flow_opencv sceneflow(args.rows, args.intensity_filename_1, args.intensity_filename_2, args.depth_filename_1, args.depth_filename_2, args.output_filename_root);
+	PD_flow_opencv sceneflow(args.rows, 
+							args.intensity_filename_1, 
+							args.intensity_filename_2, 
+							args.depth_filename_1, 
+							args.depth_filename_2, 
+							args.output_filename_root);
 
 	//Initialize CUDA and set some internal variables 
     sceneflow.initializeCUDA();
