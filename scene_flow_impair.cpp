@@ -323,7 +323,7 @@ void PD_flow_opencv::showAndSaveResults( )
 	while (!free_name)
 	{
 		nFichero++;
-		sprintf(name, "%s%02u.txt", output_filename_root, nFichero );
+		sprintf(name, "%s_results%02u.txt", output_filename_root, nFichero );
 		free_name = !fileExists(name);
 	}
 	
