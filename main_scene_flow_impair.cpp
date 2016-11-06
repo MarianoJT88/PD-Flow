@@ -26,6 +26,21 @@
 using namespace std;
 
 
+
+
+//==================================================================
+//  Arguments for running the algorithm - parsed from command line
+//==================================================================
+struct Launch_args {
+    unsigned int    rows;
+    unsigned int    show_help;
+    const char      *intensity_filename_1;
+    const char      *intensity_filename_2;
+    const char      *depth_filename_1;
+    const char      *depth_filename_2;
+    const char      *output_filename_root;
+};
+
 /**
  * Parse arguments from the command line. Valid arguments are:
  * --help (in which case other args are ignored)

@@ -46,21 +46,6 @@
 
 #endif
 
-
-
-//==================================================================
-//  Arguments for running the algorithm - parsed from command line
-//==================================================================
-struct Launch_args {
-    unsigned int    rows;
-    unsigned int    show_help;
-    const char      *intensity_filename_1;
-    const char      *intensity_filename_2;
-    const char      *depth_filename_1;
-    const char      *depth_filename_2;
-    const char      *output_filename_root;
-};
-
 //==================================================================
 //					PD-Flow class (using openCV)
 //==================================================================
@@ -119,7 +104,12 @@ public:
 	void showImages();
 	void showAndSaveResults();
 
-    PD_flow_opencv(unsigned int rows_config, const char *intensity_filename_1="i1.png", const char *intensity_filename_2="i2.png", const char *depth_filename_1="z1.png", const char *depth_filename_2="z2.png", const char* output_filename_root="pdflow");
+    PD_flow_opencv( unsigned int rows_config, 
+                    const char *intensity_filename_1="i1.png", 
+                    const char *intensity_filename_2="i2.png", 
+                    const char *depth_filename_1="z1.png", 
+                    const char *depth_filename_2="z2.png", 
+                    const char* output_filename_root="pdflow");
 };
 
 
