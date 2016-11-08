@@ -102,6 +102,8 @@ public:
     void freeGPUMemory();
     void initializeCUDA();
 	void showImages();
+    cv::Mat createImage() const;
+    void saveResults( const cv::Mat& image) const;
 	void showAndSaveResults();
 
     PD_flow_opencv( unsigned int rows_config, 

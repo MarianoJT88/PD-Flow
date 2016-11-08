@@ -281,7 +281,8 @@ bool PD_flow_opencv::loadRGBDFrames()
 	return 1;
 }
 
-void PD_flow_opencv::showAndSaveResults( )
+// Create the image
+cv::Mat PD_flow_opencv::createImage() const
 {
 	//Save scene flow as an RGB image (one colour per direction)
 	cv::Mat sf_image(rows, cols, CV_8UC3);
@@ -308,13 +309,14 @@ void PD_flow_opencv::showAndSaveResults( )
             sf_image.at<cv::Vec3b>(v,u)[2] = static_cast<unsigned char>(255.f*fabs(dzp[v + u*rows])/maxmodz); //Red - z
 		}
 	
-	//Show the scene flow as an RGB image	
-	cv::namedWindow("SceneFlow", cv::WINDOW_NORMAL);
-    cv::moveWindow("SceneFlow",width - cols/2,height - rows/2);
-	cv::imshow("SceneFlow", sf_image);
-	cv::waitKey(100000);
+	return sf_image;
+}
 
-
+/**
+ * Save results without displaying them
+ */
+void PD_flow_opencv::saveResults( const cv::Mat& sf_image ) const
+{
 	//Save the scene flow as a text file 
 	char	name[500];
 	int     nFichero = 0;
@@ -348,4 +350,18 @@ void PD_flow_opencv::showAndSaveResults( )
 	sprintf(name, "%s_representation%02u.png", output_filename_root, nFichero);
 	printf("Saving the visual representation to file: %s \n", name);
 	cv::imwrite(name, sf_image);
+}
+
+
+void PD_flow_opencv::showAndSaveResults( )
+{
+	cv::Mat sf_image = createImage( );
+
+	//Show the scene flow as an RGB image	
+	cv::namedWindow("SceneFlow", cv::WINDOW_NORMAL);
+    cv::moveWindow("SceneFlow",width - cols/2,height - rows/2);
+	cv::imshow("SceneFlow", sf_image);
+	cv::waitKey(100000);
+
+	saveResults( sf_image );
 }
