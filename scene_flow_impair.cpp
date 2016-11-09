@@ -177,8 +177,7 @@ void PD_flow_opencv::initializeCUDA()
  	char name[100];
 	
 	//Read one image to know the image resolution
-	sprintf(name, "i1.png");
-	intensity1 = cv::imread(name, CV_LOAD_IMAGE_GRAYSCALE);
+	intensity1 = cv::imread(intensity_filename_1, CV_LOAD_IMAGE_GRAYSCALE);
 
 	width = intensity1.cols;
 	height = intensity1.rows;
