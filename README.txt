@@ -44,7 +44,6 @@ Both apps can read command line arguments. By adding the argument "--help" you w
 
 The coarsest level of the pyramid is always 15 x 20, so the total number of coarse-to-fine levels will depend on the parameter "rows". By default, rows = 240.
 
-
 The images that "Scene-Flow-Impair" reads can be specified on the command line 
 
 --i1 <filename> : The file name of the first intensity image. Defaults to i1.png
@@ -71,6 +70,8 @@ Scene-Flow_Impair writes outputs to two files, a text version containing the ful
 --out <root>    : The output file name root. Defaults to pdflow. 
                   The results will be written to <root>_resultsNN.txt and root_representationNN.png 
                   where NN is a two digit number.
+
+--no-show       : Supresses display of images so that the code can be run in batch mode. Output files are still generated
 
 
 The algorithm convergence is set to a fixed number of iterations at each level of the coarse-to-fine scheme, and depends on the amount of levels and the level itself. If necessary, it can be changed by modifying the variable num_max_iter[].
