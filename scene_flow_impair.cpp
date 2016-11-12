@@ -174,8 +174,6 @@ void PD_flow_opencv::freeGPUMemory()
 
 void PD_flow_opencv::initializeCUDA()
 {
- 	char name[100];
-	
 	//Read one image to know the image resolution
 	intensity1 = cv::imread(intensity_filename_1, CV_LOAD_IMAGE_GRAYSCALE);
 
