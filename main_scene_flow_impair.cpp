@@ -39,6 +39,7 @@ struct Launch_args {
     const char      *depth_filename_1;
     const char      *depth_filename_2;
     const char      *output_filename_root;
+    bool            no_show;
 };
 
 /**
@@ -63,6 +64,7 @@ bool parse_arguments( int num_arg, char *argv[], Launch_args& args) {
 	args.depth_filename_1 = "z1.png";
 	args.depth_filename_2 = "z2.png";
 	args.output_filename_root = "pdflow";
+	args.no_show = false;
 
 	// Now check what's provided
 	bool parsed_ok = true;
@@ -113,6 +115,8 @@ bool parse_arguments( int num_arg, char *argv[], Launch_args& args) {
 			} else {
 				parsed_ok = false;
 			}
+		} else if ( strcmp( "--no-show", argv[arg_idx]) == 0 ) {
+			args.no_show = true;
 		} else {
 			parsed_ok = false;
 			break;
@@ -140,11 +144,12 @@ int main(int num_arg, char *argv[])
 		printf(" --help: Shows this menu... \n\n");
 		printf(" --rows r: Number of rows at the finest level of the pyramid. \n");
 		printf("\t   Options: r=15, r=30, r=60, r=120, r=240, r=480 (if VGA)\n");
- 		printf(" --i1 <filename> The first RGB image file name. Defaults to i1.png\n" );
- 		printf(" --i2 <filename> The second RGB image file name. Defaults to i2.png\n" );
- 		printf(" --z1 <filename> The first depth image file name. Defaults to z1.png\n" );
- 		printf(" --z2 <filename> The second depth image file name. Defaults to z2.png\n" );
- 		printf(" --out <filename> The output file name root. Omit file extension. Defaults to pdflow\n" );
+ 		printf(" --i1 <filename> : The first RGB image file name. Defaults to i1.png\n" );
+ 		printf(" --i2 <filename> : The second RGB image file name. Defaults to i2.png\n" );
+ 		printf(" --z1 <filename> : The first depth image file name. Defaults to z1.png\n" );
+ 		printf(" --z2 <filename> : The second depth image file name. Defaults to z2.png\n" );
+ 		printf(" --out <filename>: The output file name root. Omit file extension. Defaults to pdflow\n" );
+ 		printf(" --no-show       : Don't show the output results. Useful for batch processing\n");
         getwchar();
 		return 1;
 	}
@@ -167,9 +172,17 @@ int main(int num_arg, char *argv[])
 
 	if (imloaded == 1)
 	{
-		sceneflow.showImages();	
+		if( args.no_show == false ) 
+		{
+			sceneflow.showImages();	
+		}
 		sceneflow.solveSceneFlowGPU();
-		sceneflow.showAndSaveResults();
+		if( args.no_show ) {
+			cv::Mat image = sceneflow.createImage( );
+			sceneflow.saveResults( image );
+		} else {
+			sceneflow.showAndSaveResults();
+		}
 		sceneflow.freeGPUMemory();
         printf("\nPush any key over the scene flow image to finish\n");
 	}
