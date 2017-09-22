@@ -66,12 +66,13 @@ int main(int num_arg, char *argv[])
 	bool imloaded = sceneflow.loadRGBDFrames();
 
 	if (imloaded == 1)
-	{
-		sceneflow.showImages();	
+	{	
 		sceneflow.solveSceneFlowGPU();
+		sceneflow.showImages();
 		sceneflow.showAndSaveResults();
 		sceneflow.freeGPUMemory();
         printf("\nPush any key over the scene flow image to finish\n");
+		cv::waitKey(0);
 	}
 
 	return 0;

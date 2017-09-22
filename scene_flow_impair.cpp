@@ -203,8 +203,6 @@ void PD_flow_opencv::showImages()
 	cv::namedWindow("Z2", cv::WINDOW_AUTOSIZE);
 	cv::moveWindow("Z2",dispx,dispy);
 	cv::imshow("Z2", depth2);
-
-	cv::waitKey(30);
 }
 
 bool PD_flow_opencv::loadRGBDFrames()
@@ -304,8 +302,6 @@ void PD_flow_opencv::showAndSaveResults()
 	cv::namedWindow("SceneFlow", cv::WINDOW_NORMAL);
     cv::moveWindow("SceneFlow",width - cols/2,height - rows/2);
 	cv::imshow("SceneFlow", sf_image);
-	cv::waitKey(100000);
-
 
 	//Save the scene flow as a text file 
 	char	name[100];
