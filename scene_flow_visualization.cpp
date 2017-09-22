@@ -43,6 +43,8 @@ PD_flow_mrpt::PD_flow_mrpt(unsigned int cam_mode_config, unsigned int fps_config
 			num_max_iter[i] = num_max_iter[i+1]-15;
 	}
 
+	//num_max_iter[ctf_levels-1] = 0.f;
+
     //Compute gaussian mask
 	float v_mask[5] = {1.f,4.f,6.f,4.f,1.f};
     for (unsigned int i=0; i<5; i++)

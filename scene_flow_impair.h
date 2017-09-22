@@ -46,8 +46,6 @@
 
 #endif
 
-
-
 //==================================================================
 //					PD-Flow class (using openCV)
 //==================================================================
@@ -90,6 +88,13 @@ public:
     //Cuda
     CSF_cuda csf_host, *csf_device;
 
+    // Filenames
+    const char *intensity_filename_1;
+    const char *intensity_filename_2;
+    const char *depth_filename_1;
+    const char *depth_filename_2;
+    const char *output_filename_root;
+
 	//Methods
 	bool loadRGBDFrames();
     void createImagePyramidGPU();
@@ -97,9 +102,16 @@ public:
     void freeGPUMemory();
     void initializeCUDA();
 	void showImages();
+    cv::Mat createImage() const;
+    void saveResults( const cv::Mat& image) const;
 	void showAndSaveResults();
 
-    PD_flow_opencv(unsigned int rows_config);
+    PD_flow_opencv( unsigned int rows_config, 
+                    const char *intensity_filename_1="i1.png", 
+                    const char *intensity_filename_2="i2.png", 
+                    const char *depth_filename_1="z1.png", 
+                    const char *depth_filename_2="z2.png", 
+                    const char* output_filename_root="pdflow");
 };
 
 
