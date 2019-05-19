@@ -279,6 +279,10 @@ __host__ void CSF_cuda::freeDeviceMemory()
     cudaFree(puu_l_dev); cudaFree(puv_l_dev);
     cudaFree(pvu_l_dev); cudaFree(pvv_l_dev);
     cudaFree(pwu_l_dev); cudaFree(pwv_l_dev);
+	
+	cudaFree(colour_wf_dev);
+	cudaFree(depth_wf_dev);
+
 
     cudaFree(dx_dev); cudaFree(dy_dev); cudaFree(dz_dev);
 }
